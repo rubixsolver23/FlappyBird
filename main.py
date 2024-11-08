@@ -19,9 +19,20 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE and game.active:
+                   game.flap()
 
-    game.show_background(screen)
 
     
+
+    game.show_background(screen)
+    if game.active:
+        game.show_bird(screen)
+        game.update_bird()
+    game.show_ground(screen)
+    game.move_ground()
+
+
     pygame.display.update()
     mainClock.tick(120)
