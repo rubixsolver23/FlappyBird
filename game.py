@@ -13,6 +13,9 @@ class Game:
         self.gravity = 0.05
         self.bird_movement = 0
         self.rotated_bird = pygame.Surface((0,0))
+        self.pipes = []
+        self.pipe_height = [280, 425, 562]
+        self.game_speed = 1
     
     def resize_images(self):
         self.bird = pygame.transform.scale(self.bird, (51,34))
@@ -27,9 +30,9 @@ class Game:
         screen.blit(self.ground, (self.ground_position, 650))
 
     def move_ground(self):
-        self.ground_position -= 1
-        self.ground_position %= 45
-        self.ground_position -= 45
+        self.ground_position -= self.game_speed
+        self.ground_position %= 43.5
+        self.ground_position -= 43.5
     
     def show_bird(self, screen):
         screen.blit(self.rotated_bird, self.bird_rect)
@@ -40,9 +43,35 @@ class Game:
         self.bird_rect.centery += self.bird_movement
 
     def rotate_bird(self):
-        new_bird = pygame.transform.rotozoom(self.bird, -self.bird_movement * 3, 1)
+        new_bird = pygame.transform.rotozoom(self.bird, -self.bird_movement * 4, 1)
         return new_bird
 
     def flap(self):
-        self.bird_movement = 0
-        self.bird_movement -= 3
+        self.bird_movement = -3
+
+    def spawn_pipe(self):
+        random_pipe_pos = random.choice(self.pipe_height)
+        bottom_pipe = self.pipe.get_rect(midtop = (600,random_pipe_pos))
+        top_pipe = self.pipe.get_rect(midbottom = (600, random_pipe_pos-200))
+        self.pipes.append(bottom_pipe)
+        self.pipes.append(top_pipe)
+
+    def move_pipes(self):
+        for pipe in self.pipes:
+            pipe.centerx -= self.game_speed
+            if pipe.right <= 0:
+                self.pipes.remove(pipe)
+    
+    def show_pipes(self, screen):
+        for pipe in self.pipes:
+            if pipe.bottom >= 700:
+                screen.blit(self.pipe, pipe)
+            else:
+                flip_pipe = pygame.transform.flip(self.pipe, False, True)
+                screen.blit(flip_pipe, pipe)
+
+    def check_collision(self):
+        self.active = self.bird_rect.collidelist(self.pipes) < 0
+        
+        if self.bird_rect.top <= -100 or self.bird_rect.bottom >= 650:
+            self.active = False
